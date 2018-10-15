@@ -32,4 +32,38 @@ enum key_e {
     KEY_PCT
 };
 
+#define WIDTH (8)
+
+struct reg_s {
+    int d[WIDTH];   /* digits of the value, #0 - the rightmost digit */
+    int exp;        /* number of digits to the left of the point */
+    int neg;        /* if the value is negative */
+};
+
+extern struct reg_s reg_1;  /* displayed argument */
+extern struct reg_s reg_2;  /* second argument, the constant */
+
+enum state_e {
+    ST_READY = 0,   /* after power-on, clear entry, or calculation */
+    ST_INT,         /* entering the integer part of an argument */
+    ST_FRAC,        /* entering the fractional part, point is set */
+    ST_ERROR        /* error after calculation */
+};
+
+enum func_e {
+    FN_NOP = 0,                         /* no operation */
+    FN_ADD, FN_SUB, FN_MUL, FN_DIV,     /* chained calculations */
+    FN_REP_ADD, FN_REP_SUB,             /* repeated calculations */
+    FN_REP_MUL, FN_REP_DIV
+};
+
+struct control_s {
+    enum state_e    state;
+    enum func_e     func;
+};
+
+extern struct control_s control;
+
+extern void key_pressed(enum key_e key);
+
 #endif /* SIMULATOR_B3_23_H_ */
