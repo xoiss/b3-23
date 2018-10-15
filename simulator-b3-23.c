@@ -42,8 +42,18 @@ static void exchange_arguments(void);
 static int calculate(void);
 static int isrepeated(void);
 
+static int calculate_add(void);
+static int calculate_sub(void);
+
 static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
+static void normalize(struct reg_s *reg);
+static void denormalize(struct reg_s *reg);
+static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
+static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
+static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
+static int add(struct reg_s *reg_dst, struct reg_s *reg_src);
+static void sub(struct reg_s *reg_dst, struct reg_s *reg_src);
 static int islimit_left(struct reg_s *reg);
 static int islimit_right(struct reg_s *reg);
 static void shift_left(struct reg_s *reg);
@@ -165,13 +175,7 @@ static void enter_number(int digit)
 
 static void normalize_display(void)
 {
-    while (!islimit_right(&reg_1)) {
-        shift_right(&reg_1);
-        reg_1.exp -= 1;
-    }
-    if (iszero(&reg_1)) {
-        reg_1.neg = 0;
-    }
+    normalize(&reg_1);
 }
 
 static void push_argument(void)
@@ -181,9 +185,7 @@ static void push_argument(void)
 
 static void exchange_arguments(void)
 {
-    struct reg_s reg = reg_2;
-    reg_2 = reg_1;
-    reg_1 = reg;
+    exchange(&reg_1, &reg_2);
 }
 
 static int calculate(void)
@@ -197,10 +199,10 @@ static int calculate(void)
     }
     switch (control.func) {
     case FN_REP_ADD:
-        /* TODO: implement */
+        error = calculate_add();
         break;
     case FN_REP_SUB:
-        /* TODO: implement */
+        error = calculate_sub();
         break;
     case FN_REP_MUL:
         /* TODO: implement */
@@ -222,6 +224,42 @@ static int isrepeated(void)
     return control.func >= FN_REP_ADD && control.func <= FN_REP_DIV;
 }
 
+static int calculate_add(void)
+{
+    int carry;
+    struct reg_s reg_2b = reg_2;
+    denormalize(&reg_1);
+    denormalize(&reg_2b);
+    equalize(&reg_1, &reg_2b);
+    if (reg_1.neg == reg_2b.neg) {
+        carry = add(&reg_1, &reg_2b);
+        if (carry != 0) {
+            shift_right(&reg_1);
+            reg_1.d[WIDTH - 1] = carry;
+            reg_1.exp -= 1;
+            if (reg_1.exp < 0) {
+                reg_1.exp += WIDTH;
+                return 1;  /* overflow */
+            }
+        }
+    } else {
+        if (compare(&reg_1, &reg_2b) < 0) {
+            exchange(&reg_1, &reg_2b);
+        }
+        sub(&reg_1, &reg_2b);
+    }
+    return 0;
+}
+
+static int calculate_sub(void)
+{
+    int error;
+    reg_2.neg = !reg_2.neg;
+    error = calculate_add();
+    reg_2.neg = !reg_2.neg;
+    return error;
+}
+
 static int iszero(struct reg_s *reg)
 {
     int i;
@@ -241,6 +279,89 @@ static void clear(struct reg_s *reg)
     }
     reg->exp = 0;
     reg->neg = 0;
+}
+
+static void normalize(struct reg_s *reg)
+{
+    while (!islimit_right(reg)) {
+        shift_right(reg);
+        reg->exp -= 1;
+    }
+    if (iszero(reg)) {
+        reg->neg = 0;
+    }
+}
+
+static void denormalize(struct reg_s *reg)
+{
+    while (!islimit_left(reg)) {
+        shift_left(reg);
+        reg->exp += 1;
+    }
+}
+
+static void equalize(struct reg_s *reg_a, struct reg_s *reg_b)
+{
+    while (reg_a->exp > reg_b->exp) {
+        shift_right(reg_a);
+        reg_a->exp -= 1;
+    }
+    while (reg_a->exp < reg_b->exp) {
+        shift_right(reg_b);
+        reg_b->exp -= 1;
+    }
+}
+
+static int compare(struct reg_s *reg_a, struct reg_s *reg_b)
+{
+    int i;
+    for (i = WIDTH - 1; i >= 0; --i) {
+        if (reg_a->d[i] > reg_b->d[i]) {
+            return 1;
+        }
+        if (reg_a->d[i] < reg_b->d[i]) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+static void exchange(struct reg_s *reg_a, struct reg_s *reg_b)
+{
+    struct reg_s reg_x = *reg_b;
+    *reg_b = *reg_a;
+    *reg_a = reg_x;
+}
+
+static int add(struct reg_s *reg_dst, struct reg_s *reg_src)
+{
+    int i, digit, carry = 0;
+    for (i = 0; i < WIDTH; ++i) {
+        digit = reg_dst->d[i] + reg_src->d[i] + carry;
+        if (digit < 10) {
+            reg_dst->d[i] = digit;
+            carry = 0;
+        } else {
+            reg_dst->d[i] = digit - 10;
+            carry = 1;
+        }
+    }
+    return carry;
+}
+
+static void sub(struct reg_s *reg_dst, struct reg_s *reg_src)
+{
+    int i, digit, borrow = 0;
+    for (i = 0; i < WIDTH; ++i) {
+        digit = reg_dst->d[i] - reg_src->d[i] - borrow;
+        if (digit >= 0) {
+            reg_dst->d[i] = digit;
+            borrow = 0;
+        } else {
+            reg_dst->d[i] = digit + 10;
+            borrow = 1;
+        }
+    }
 }
 
 static int islimit_left(struct reg_s *reg)
