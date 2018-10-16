@@ -475,9 +475,17 @@ static void shift_left(struct reg_s *reg)
 
 static void shift_right(struct reg_s *reg)
 {
-    int i;
+    int i, digit, carry;
+    carry = (reg->d[0] >= 5);
     for (i = 0; i < WIDTH - 1; ++i) {
-        reg->d[i] = reg->d[i + 1];
+        digit = reg->d[i + 1] + carry;
+        if (digit < 10) {
+            reg->d[i] = digit;
+            carry = 0;
+        } else {
+            reg->d[i] = 0;
+            carry = 1;
+        }
     }
-    reg->d[WIDTH - 1] = 0;
+    reg->d[WIDTH - 1] = carry;
 }
