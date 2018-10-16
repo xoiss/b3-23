@@ -44,6 +44,7 @@ static int isrepeated(void);
 
 static int calculate_add(void);
 static int calculate_sub(void);
+static int calculate_mul(void);
 
 static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
@@ -205,7 +206,7 @@ static int calculate(void)
         error = calculate_sub();
         break;
     case FN_REP_MUL:
-        /* TODO: implement */
+        error = calculate_mul();
         break;
     case FN_REP_DIV:
         /* TODO: implement */
@@ -258,6 +259,48 @@ static int calculate_sub(void)
     error = calculate_add();
     reg_2.neg = !reg_2.neg;
     return error;
+}
+
+static int calculate_mul(void)
+{
+    int i, digit, carry = 0, exp_1, exp_2, exp_p = -(WIDTH - 1);
+    struct reg_s reg_p;
+    exp_1 = reg_1.exp;
+    reg_1.exp = 0;
+    denormalize(&reg_1);
+    exp_p += exp_1 + reg_1.exp;
+    exp_2 = reg_2.exp;
+    reg_2.exp = 0;
+    denormalize(&reg_2);
+    exp_p += exp_2 + reg_2.exp;
+    clear(&reg_p);
+    for (i = 0; i < WIDTH; ++i) {
+        shift_right(&reg_p);
+        reg_p.d[WIDTH - 1] = carry;
+        carry = 0;
+        for (digit = reg_2.d[i]; digit > 0; --digit) {
+            carry += add(&reg_p, &reg_1);
+        }
+    }
+    if (carry != 0) {
+        shift_right(&reg_p);
+        reg_p.d[WIDTH - 1] = carry;
+        exp_p -= 1;
+    }
+    normalize(&reg_2);
+    reg_2.exp = exp_2;
+    reg_p.exp = exp_p;
+    reg_p.neg = reg_1.neg ^ reg_2.neg;
+    reg_1 = reg_p;
+    if (reg_1.exp < 0) {
+        reg_1.exp += WIDTH;
+        return 1;  /* overflow */
+    }
+    while (reg_1.exp >= WIDTH) {
+        shift_right(&reg_1);
+        reg_1.exp -= 1;
+    }
+    return 0;
 }
 
 static int iszero(struct reg_s *reg)
