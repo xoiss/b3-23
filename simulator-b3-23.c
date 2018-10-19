@@ -230,12 +230,12 @@ static int isrepeated(void)
 
 static int calculate_add(void)
 {
-    int carry;
+    int carry, borrow, reg_1b;
     struct reg_s reg_2b = reg_2;
     denormalize(&reg_1);
     denormalize(&reg_2b);
-    equalize(&reg_1, &reg_2b);
     if (reg_1.neg == reg_2b.neg) {
+        equalize(&reg_1, &reg_2b);
         carry = add(&reg_1, &reg_2b);
         if (carry != 0) {
             shift_right(&reg_1);
@@ -247,10 +247,27 @@ static int calculate_add(void)
             }
         }
     } else {
-        if (compare(&reg_1, &reg_2b) < 0) {
-            exchange(&reg_1, &reg_2b);
+        if (reg_1.exp != reg_2b.exp) {
+            if (reg_1.exp > reg_2b.exp) {
+                exchange(&reg_1, &reg_2b);
+            }
+            reg_1b = reg_1.d[WIDTH - 1];
+            shift_left(&reg_1);
+            reg_1.exp += 1;
+            equalize(&reg_1, &reg_2b);
+            borrow = sub(&reg_1, &reg_2b);
+            reg_1b -= borrow;
+            if (reg_1b != 0) {
+                shift_right(&reg_1);
+                reg_1.d[WIDTH - 1] = reg_1b;
+                reg_1.exp -= 1;
+            }
+        } else {
+            if (compare(&reg_1, &reg_2b) < 0) {
+                exchange(&reg_1, &reg_2b);
+            }
+            sub(&reg_1, &reg_2b);
         }
-        sub(&reg_1, &reg_2b);
     }
     return 0;
 }
