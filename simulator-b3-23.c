@@ -51,6 +51,8 @@ static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
 static void normalize(struct reg_s *reg);
 static void denormalize(struct reg_s *reg);
+static int justify(struct reg_s *reg);
+static void round(struct reg_s *reg);
 static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
 static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
 static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
@@ -264,17 +266,11 @@ static int calculate_sub(void)
 
 static int calculate_mul(void)
 {
-    int i, digit, carry = 0, exp_1, exp_2, exp_p = -(WIDTH - 1);
+    int i, digit, carry = 0, exp_2 = reg_2.exp;
     struct reg_s reg_p;
-    exp_1 = reg_1.exp;
-    reg_1.exp = 0;
-    denormalize(&reg_1);
-    exp_p += exp_1 + reg_1.exp;
-    exp_2 = reg_2.exp;
-    reg_2.exp = 0;
-    denormalize(&reg_2);
-    exp_p += exp_2 + reg_2.exp;
     clear(&reg_p);
+    reg_p.exp = justify(&reg_1) + justify(&reg_2) - (WIDTH - 1);
+    reg_p.neg = reg_1.neg ^ reg_2.neg;
     for (i = 0; i < WIDTH; ++i) {
         shift_right(&reg_p);
         reg_p.d[WIDTH - 1] = carry;
@@ -286,42 +282,31 @@ static int calculate_mul(void)
     if (carry != 0) {
         shift_right(&reg_p);
         reg_p.d[WIDTH - 1] = carry;
-        exp_p -= 1;
+        reg_p.exp -= 1;
     }
     normalize(&reg_2);
     reg_2.exp = exp_2;
-    reg_p.exp = exp_p;
-    reg_p.neg = reg_1.neg ^ reg_2.neg;
     reg_1 = reg_p;
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
         return 1;  /* overflow */
     }
-    while (reg_1.exp >= WIDTH) {
-        shift_right(&reg_1);
-        reg_1.exp -= 1;
-    }
+    round(&reg_1);
     return 0;
 }
 
 static int calculate_div(void)
 {
-    int i, digit, borrow, reg_1b = 0, exp_1, exp_2, exp_q = (WIDTH - 1);
+    int i, digit, borrow, reg_1b = 0, exp_2 = reg_2.exp;
     struct reg_s reg_q;
     if (iszero(&reg_2)) {
         clear(&reg_1);
-        reg_1.exp = exp_q;
+        reg_1.exp = (WIDTH - 1);
         return 1;  /* overflow */
     }
-    exp_1 = reg_1.exp;
-    reg_1.exp = 0;
-    denormalize(&reg_1);
-    exp_q += exp_1 + reg_1.exp;
-    exp_2 = reg_2.exp;
-    reg_2.exp = 0;
-    denormalize(&reg_2);
-    exp_q -= exp_2 + reg_2.exp;
     clear(&reg_q);
+    reg_q.exp = justify(&reg_1) - justify(&reg_2) + (WIDTH - 1);
+    reg_q.neg = reg_1.neg ^ reg_2.neg;
     for (i = WIDTH - 1; i >= 0; --i) {
         digit = 0;
         while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
@@ -335,17 +320,12 @@ static int calculate_div(void)
     }
     normalize(&reg_2);
     reg_2.exp = exp_2;
-    reg_q.exp = exp_q;
-    reg_q.neg = reg_1.neg ^ reg_2.neg;
     reg_1 = reg_q;
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
         return 1;  /* overflow */
     }
-    while (reg_1.exp >= WIDTH) {
-        shift_right(&reg_1);
-        reg_1.exp -= 1;
-    }
+    round(&reg_1);
     return 0;
 }
 
@@ -386,6 +366,22 @@ static void denormalize(struct reg_s *reg)
     while (!islimit_left(reg)) {
         shift_left(reg);
         reg->exp += 1;
+    }
+}
+
+static int justify(struct reg_s *reg)
+{
+    int exp = reg->exp;
+    reg->exp = 0;
+    denormalize(reg);
+    return exp + reg->exp;
+}
+
+static void round(struct reg_s *reg)
+{
+    while (reg->exp >= WIDTH) {
+        shift_right(reg);
+        reg->exp -= 1;
     }
 }
 
