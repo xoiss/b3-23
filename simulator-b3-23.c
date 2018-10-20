@@ -326,6 +326,11 @@ static int calculate_div(void)
     exp_2 = reg_2.exp;
     exp_q = justify(&reg_1) - justify(&reg_2) + (WIDTH - 1);
     clear(&reg_q);
+    if (compare(&reg_1, &reg_2) < 0) {
+        reg_1b = reg_1.d[WIDTH - 1];
+        shift_left(&reg_1);
+        exp_q += 1;
+    }
     for (i = WIDTH - 1; i >= 0; --i) {
         digit = 0;
         while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
