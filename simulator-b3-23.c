@@ -342,6 +342,17 @@ static int calculate_div(void)
         reg_1b = reg_1.d[WIDTH - 1];
         shift_left(&reg_1);
     }
+    digit = 0;
+    while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
+        borrow = sub(&reg_1, &reg_2);
+        reg_1b -= borrow;
+        digit += 1;
+    }
+    if (digit >= 5) {
+        clear(&reg_1);
+        reg_1.d[0] = 1;
+        add(&reg_q, &reg_1);
+    }
     normalize(&reg_2);
     reg_2.exp = exp_2;
     reg_q.exp = exp_q;
