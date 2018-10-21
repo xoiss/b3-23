@@ -54,7 +54,9 @@ enum func_e {
     FN_NOP = 0,                         /* no operation */
     FN_ADD, FN_SUB, FN_MUL, FN_DIV,     /* chained calculations */
     FN_REP_ADD, FN_REP_SUB,             /* repeated calculations */
-    FN_REP_MUL, FN_REP_DIV
+    FN_REP_MUL, FN_REP_DIV,
+    FN_PCT_ADD, FN_PCT_SUB,             /* percentage calculations */
+    FN_PCT_MUL, FN_PCT_DIV
 };
 
 struct control_s {
