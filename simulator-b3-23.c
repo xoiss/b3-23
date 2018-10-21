@@ -58,6 +58,10 @@ static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
 static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
 static int add(struct reg_s *reg_dst, struct reg_s *reg_src);
 static int sub(struct reg_s *reg_dst, struct reg_s *reg_src);
+static void mul(struct reg_s *reg_p,
+        struct reg_s *reg_a, struct reg_s *reg_b);
+static void div(struct reg_s *reg_q,
+        struct reg_s *reg_a, struct reg_s *reg_b);
 static int islimit_left(struct reg_s *reg);
 static int islimit_right(struct reg_s *reg);
 static void shift_left(struct reg_s *reg);
@@ -283,28 +287,11 @@ static int calculate_sub(void)
 
 static int calculate_mul(void)
 {
-    int i, digit, carry = 0, exp_2, exp_p;
+    int exp_2 = reg_2.exp;
     struct reg_s reg_p;
-    exp_2 = reg_2.exp;
-    exp_p = justify(&reg_1) + justify(&reg_2) - (WIDTH - 1);
-    clear(&reg_p);
-    for (i = 0; i < WIDTH; ++i) {
-        shift_right(&reg_p);
-        reg_p.d[WIDTH - 1] = carry;
-        carry = 0;
-        for (digit = reg_2.d[i]; digit > 0; --digit) {
-            carry += add(&reg_p, &reg_1);
-        }
-    }
-    if (carry != 0) {
-        shift_right(&reg_p);
-        reg_p.d[WIDTH - 1] = carry;
-        exp_p -= 1;
-    }
+    mul(&reg_p, &reg_1, &reg_2);
     normalize(&reg_2);
     reg_2.exp = exp_2;
-    reg_p.exp = exp_p;
-    reg_p.neg = reg_1.neg ^ reg_2.neg;
     reg_1 = reg_p;
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
@@ -316,47 +303,16 @@ static int calculate_mul(void)
 
 static int calculate_div(void)
 {
-    int i, digit, borrow, reg_1b = 0, exp_2, exp_q;
+    int exp_2 = reg_2.exp;
     struct reg_s reg_q;
     if (iszero(&reg_2)) {
         clear(&reg_1);
         reg_1.exp = (WIDTH - 1);
         return 1;  /* overflow */
     }
-    exp_2 = reg_2.exp;
-    exp_q = justify(&reg_1) - justify(&reg_2) + (WIDTH - 1);
-    clear(&reg_q);
-    if (compare(&reg_1, &reg_2) < 0) {
-        reg_1b = reg_1.d[WIDTH - 1];
-        shift_left(&reg_1);
-        exp_q += 1;
-    }
-    for (i = WIDTH - 1; i >= 0; --i) {
-        digit = 0;
-        while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
-            borrow = sub(&reg_1, &reg_2);
-            reg_1b -= borrow;
-            digit += 1;
-        }
-        reg_q.d[i] = digit;
-        reg_1b = reg_1.d[WIDTH - 1];
-        shift_left(&reg_1);
-    }
-    digit = 0;
-    while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
-        borrow = sub(&reg_1, &reg_2);
-        reg_1b -= borrow;
-        digit += 1;
-    }
-    if (digit >= 5) {
-        clear(&reg_1);
-        reg_1.d[0] = 1;
-        add(&reg_q, &reg_1);
-    }
+    div(&reg_q, &reg_1, &reg_2);
     normalize(&reg_2);
     reg_2.exp = exp_2;
-    reg_q.exp = exp_q;
-    reg_q.neg = reg_1.neg ^ reg_2.neg;
     reg_1 = reg_q;
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
@@ -485,6 +441,64 @@ static int sub(struct reg_s *reg_dst, struct reg_s *reg_src)
         }
     }
     return borrow;
+}
+
+static void mul(struct reg_s *reg_p,
+        struct reg_s *reg_a, struct reg_s *reg_b)
+{
+    int i, digit, carry = 0;
+    clear(reg_p);
+    reg_p->exp = justify(reg_a) + justify(reg_b) - (WIDTH - 1);
+    reg_p->neg = reg_a->neg ^ reg_b->neg;
+    for (i = 0; i < WIDTH; ++i) {
+        shift_right(reg_p);
+        reg_p->d[WIDTH - 1] = carry;
+        carry = 0;
+        for (digit = reg_b->d[i]; digit > 0; --digit) {
+            carry += add(reg_p, reg_a);
+        }
+    }
+    if (carry != 0) {
+        shift_right(reg_p);
+        reg_p->d[WIDTH - 1] = carry;
+        reg_p->exp -= 1;
+    }
+}
+
+static void div(struct reg_s *reg_q,
+        struct reg_s *reg_a, struct reg_s *reg_b)
+{
+    int i, digit, borrow, reg_ab = 0;
+    clear(reg_q);
+    reg_q->exp = justify(reg_a) - justify(reg_b) + (WIDTH - 1);
+    reg_q->neg = reg_a->neg ^ reg_b->neg;
+    if (compare(reg_a, reg_b) < 0) {
+        reg_ab = reg_a->d[WIDTH - 1];
+        shift_left(reg_a);
+        reg_q->exp += 1;
+    }
+    for (i = WIDTH - 1; i >= 0; --i) {
+        digit = 0;
+        while (reg_ab != 0 || compare(reg_a, reg_b) >= 0) {
+            borrow = sub(reg_a, reg_b);
+            reg_ab -= borrow;
+            digit += 1;
+        }
+        reg_q->d[i] = digit;
+        reg_ab = reg_a->d[WIDTH - 1];
+        shift_left(reg_a);
+    }
+    digit = 0;
+    while (reg_ab != 0 || compare(reg_a, reg_b) >= 0) {
+        borrow = sub(reg_a, reg_b);
+        reg_ab -= borrow;
+        digit += 1;
+    }
+    if (digit >= 5) {
+        clear(reg_a);
+        reg_a->d[0] = 1;
+        add(reg_q, reg_a);
+    }
 }
 
 static int islimit_left(struct reg_s *reg)
