@@ -208,8 +208,8 @@ static void exchange_arguments(void)
 static int calculate(enum mode_e mode)
 {
     int error = 0;
+    int pct = ispercentage();
     enum func_e func = getfunc();
-    enum dir_e dir = !ispercentage() ? DR_1_2 : DR_2_1;
     if (func == FN_NOP) {
         return error;
     }
@@ -219,13 +219,21 @@ static int calculate(enum mode_e mode)
             error = calculate_add();
             break;
         case FN_SUB:
-            error = calculate_sub(dir);
+            error = calculate_sub(!pct ? DR_1_2 : DR_2_1);
             break;
         case FN_MUL:
-            error = calculate_mul(MD_EQU);
+            if (!pct) {
+                error = calculate_mul(MD_EQU);
+            } else {
+                error = calculate_div(DR_1_2, MD_PCT);
+            }
             break;
         case FN_DIV:
-            error = calculate_div(dir, MD_EQU);
+            if (!pct) {
+                error = calculate_div(DR_1_2, MD_EQU);
+            } else {
+                error = calculate_div(DR_2_1, MD_PCT);
+            }
             break;
         default:
             break;
