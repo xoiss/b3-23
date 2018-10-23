@@ -216,10 +216,18 @@ static int calculate(enum mode_e mode)
             reg_1.neg ^= ispercentage();
             break;
         case FN_MUL:
-            error = calculate_mul(MD_EQU);
+            if (!ispercentage()) {
+                error = calculate_mul(MD_EQU);
+            } else {
+                error = calculate_div(MD_PCT);
+            }
             break;
         case FN_DIV:
-            error = calculate_div(MD_EQU);
+            if (!ispercentage()) {
+                error = calculate_div(MD_EQU);
+            } else {
+                error = calculate_mul(MD_PCT);
+            }
             break;
         default:
             return 0;
