@@ -43,6 +43,8 @@ static const struct { enum func_e func; char c; } func2char[] = {
     { FN_ADD, '+' }, { FN_SUB, '-' }, { FN_MUL, '*' }, { FN_DIV, '/' },
     { FN_REP_ADD, '+' }, { FN_REP_SUB, '-' },
     { FN_REP_MUL, '*' }, { FN_REP_DIV, '/' },
+    { FN_PCT_ADD, '+' }, { FN_PCT_SUB, '-' },
+    { FN_PCT_MUL, '*' }, { FN_PCT_DIV, '/' },
 };
 
 static const struct { enum func_e func; char c; } mode2char[] = {
@@ -50,6 +52,8 @@ static const struct { enum func_e func; char c; } mode2char[] = {
     { FN_ADD, ' ' }, { FN_SUB, ' ' }, { FN_MUL, ' ' }, { FN_DIV, ' ' },
     { FN_REP_ADD, 'K' }, { FN_REP_SUB, 'K' },
     { FN_REP_MUL, 'K' }, { FN_REP_DIV, 'K' },
+    { FN_PCT_ADD, '%' }, { FN_PCT_SUB, '%' },
+    { FN_PCT_MUL, '%' }, { FN_PCT_DIV, '%' },
 };
 
 static void print_display(char **p);

@@ -26,6 +26,8 @@ struct reg_s reg_2;
 
 struct control_s control;
 
+enum mode_e { MD_EQU, MD_PCT };
+
 static void process_clear(void);
 static void process_number(enum key_e key);
 static void process_point(void);
@@ -39,13 +41,16 @@ static void enter_number(int digit);
 static void normalize_display(void);
 static void push_argument(void);
 static void exchange_arguments(void);
-static int calculate(void);
+static int calculate(enum mode_e mode);
 static int isrepeated(void);
+static int ispercentage(void);
+static enum func_e getfunc(void);
+static void setmode(enum mode_e mode);
 
 static int calculate_add(void);
 static int calculate_sub(void);
-static int calculate_mul(void);
-static int calculate_div(void);
+static int calculate_mul(enum mode_e mode);
+static int calculate_div(enum mode_e mode);
 
 static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
@@ -147,13 +152,19 @@ static void process_equal(void)
     if (!isrepeated() && control.func != FN_NOP) {
         exchange_arguments();
     }
-    error = calculate();
+    error = calculate(MD_EQU);
     control.state = error ? ST_ERROR : ST_READY;
 }
 
 static void process_percent(void)
 {
-    /* TODO: implement */
+    int error;
+    normalize_display();
+    if (control.func == FN_MUL || control.func == FN_DIV) {
+        exchange_arguments();
+    }
+    error = calculate(MD_PCT);
+    control.state = error ? ST_ERROR : ST_READY;
 }
 
 static void clear_all(void)
@@ -192,31 +203,40 @@ static void exchange_arguments(void)
     exchange(&reg_1, &reg_2);
 }
 
-static int calculate(void)
+static int calculate(enum mode_e mode)
 {
-    int error = 0;
-    if (control.func == FN_NOP) {
-        return error;
+    int error;
+    if (mode == MD_EQU) {
+        switch (getfunc()) {
+        case FN_ADD:
+            error = calculate_add();
+            break;
+        case FN_SUB:
+            error = calculate_sub();
+            reg_1.neg ^= ispercentage();
+            break;
+        case FN_MUL:
+            error = calculate_mul(MD_EQU);
+            break;
+        case FN_DIV:
+            error = calculate_div(MD_EQU);
+            break;
+        default:
+            return 0;
+        }
+    } else {
+        switch (getfunc()) {
+        case FN_ADD: case FN_SUB: case FN_MUL:
+            error = calculate_mul(MD_PCT);
+            break;
+        case FN_DIV:
+            error = calculate_div(MD_PCT);
+            break;
+        default:
+            return 0;
+        }
     }
-    if (!isrepeated()) {
-        control.func += (FN_REP_ADD - FN_ADD);
-    }
-    switch (control.func) {
-    case FN_REP_ADD:
-        error = calculate_add();
-        break;
-    case FN_REP_SUB:
-        error = calculate_sub();
-        break;
-    case FN_REP_MUL:
-        error = calculate_mul();
-        break;
-    case FN_REP_DIV:
-        error = calculate_div();
-        break;
-    default:
-        break;
-    }
+    setmode(mode);
     if (!error) {
         normalize_display();
     }
@@ -225,7 +245,34 @@ static int calculate(void)
 
 static int isrepeated(void)
 {
-    return control.func >= FN_REP_ADD && control.func <= FN_REP_DIV;
+    return control.func >= FN_REP_ADD;
+}
+
+static int ispercentage(void)
+{
+    return control.func >= FN_PCT_ADD;
+}
+
+static enum func_e getfunc(void)
+{
+    enum func_e func = control.func;
+    if (ispercentage()) {
+        func -= (FN_PCT_ADD - FN_ADD);
+    } else if (isrepeated()) {
+        func -= (FN_REP_ADD - FN_ADD);
+    }
+    return func;
+}
+
+static void setmode(enum mode_e mode)
+{
+    enum func_e func = getfunc();
+    if (mode == MD_PCT) {
+        func += (FN_PCT_ADD - FN_ADD);
+    } else {
+        func += (FN_REP_ADD - FN_ADD);
+    }
+    control.func = func;
 }
 
 static int calculate_add(void)
@@ -281,7 +328,7 @@ static int calculate_sub(void)
     return error;
 }
 
-static int calculate_mul(void)
+static int calculate_mul(enum mode_e mode)
 {
     int i, digit, carry = 0, exp_2 = reg_2.exp;
     struct reg_s reg_p;
@@ -304,6 +351,9 @@ static int calculate_mul(void)
     normalize(&reg_2);
     reg_2.exp = exp_2;
     reg_1 = reg_p;
+    if (mode == MD_PCT) {
+        reg_1.exp += 2;
+    }
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
         return 1;  /* overflow */
@@ -312,7 +362,7 @@ static int calculate_mul(void)
     return 0;
 }
 
-static int calculate_div(void)
+static int calculate_div(enum mode_e mode)
 {
     int i, digit, borrow, reg_1b = 0, exp_2 = reg_2.exp;
     struct reg_s reg_q;
@@ -351,11 +401,17 @@ static int calculate_div(void)
         reg_1.d[0] = 1;
         add(&reg_q, &reg_1);
     }
+    if (mode == MD_PCT) {
+        reg_q.exp -= 2;
+    }
     normalize(&reg_2);
     reg_2.exp = exp_2;
     reg_1 = reg_q;
     if (reg_1.exp < 0) {
         reg_1.exp += WIDTH;
+        if (reg_1.exp < 0) {
+            reg_1.exp += WIDTH;
+        }
         return 1;  /* overflow */
     }
     round(&reg_1);
