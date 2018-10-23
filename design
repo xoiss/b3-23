@@ -1,0 +1,115 @@
+    2   +   7   =   5   =
+0   2   2   7   9   5   12
+0   0   2   2   7   7   7
+=   =   +   +   +   +   +
+
+    2   +   7   = + 5   =
+0   2   2   7   9 9 5   
+0   0   2   2   7 9 9   
+=   =   +   +   + + +   
+
+
+
+    2   =   3   =   4   +   5   =
+0   2   2   3   3   4   4   5   9
+0   0   ?   ?   ?   ?   4   4   5
+.   .   .   .   .   .   +   +   
+
+
+    2   =
+0   2   2
+0   0   0
+.   .   .
+
+            override        override
+            |               |
+    2   +   3   =       =   4   =
+0   2   2   3   2 5     8   4   =
+0   0   2   2   3 3     3   3   =
+.   .   +   +   +(+)   (+) (+) (+)
+        |       | |     |       |
+        push    | add   add     add
+                exchange
+
+
+            override        override            don't push
+            |               |                   |
+    2   +   3   =       -   4   +       7   C   -   7
+0   2   2   3   2 5     5   4   5 1 1   7   0   0   7
+0   0   2   2   3 3     5   5   4 4 1   1   1   1   1
+.   .   +   +   +(+)    -   -   -(-)+   +   +   -   -
+        |       | |     |       | | |
+        push    | add   push    | | push
+                exchange        | sub
+                                exchange
+
+
+
+= if no operation
+normalize(r1)
+#calculate(nop)
+
+= if has operation, not repeated mode
+normalize(r1)
+exchange(r1, r2)
+calculate(op)
+switch to repeated mode
+
+= if has repeated operation
+normalize(r1)
+calculate(op)
+#switch to [stay in] repeated mode
+
+= all cases
+normalize(r1)
+exchange(r1, r2) -- if has operation, not repeated mode
+calculate(op) -- op may be nop
+switch to repeated mode -- if op != nop
+
+
+
+
+
++ if no operation || has repeated operation
+normalize(r1)
+push(r1, r2)
+accept op.new
+
++ if has operation, not repeated mode && has no second argument (ready)
+don't push(r1, r2)
+accept op.new
+
++ if has operation, not repeated mode && has second argument (int frac)
+normalize(r1)
+exchange(r1, r2)
+calculate(op.old)
+#switch to repeated mode
+push(r1, r2)
+accept op.new
+
++ all cases
+remove op.old (accept nop) -- if has repeated operation
+call "= all cases" -- if has second argument (int frac)
+push(r1, r2) -- unless has operation, not repeated mode
+accept op.new
+
+
+
++ if no operation
+normalize(r1) -- if has second argument (int frac)
+push(r1, r2)
+accept op.new
+
++ if has repeated operation
+remove op.old (accept nop)
+normalize(r1) -- if has second argument (int frac)
+push(r1, r2)
+accept op.new
+
++ if has operation, not repeated mode && has no second argument (ready)
+accept op.new
+
++ if has operation, not repeated mode && has second argument (int frac)
+call "= all cases" -- it also switches to repeated mode
+push(r1, r2)
+accept op.new

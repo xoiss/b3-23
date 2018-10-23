@@ -1,0 +1,210 @@
+/*
+power of integer -- semi-automatic
+
+operations with constant -- the constant is the 2nd argument
+
+sign -- the 9th digit
+still uncertain how "-1." is indicated
+and would be "-0." normalized to 0.
+
+zero is optional when entering a fractional number less than 1
+
+error = all points are lit
+error = overflow in operations, division by zero
+error = keys are locked except C, that clears the error
+after clear, the number of digits in the integer part = the number of digits not fit into the display
+still uncertain what would be indicated exactly on division by zero: for positive number, and for negative number
+and what would be indicated after C is pressed once
+and if the keyboard is enabled after that
+
+C -- clear error, clear keyboard, clear all
+seems like clear keyboard is only if a numeric key (or P) was pressed at least once immediately before that
+
+chained operations, no need to press [=] in the middle
+
+8 digits
+
+after power on: [0.]
+
+indication is shifted to the right: [      0.]
+*/
+
+/*
+from the user manual on b3-23
+
+123    +    456    =
+  123. 123.   456. 579.
+
+
+456    -    123    =
+  456. 456.   123. 333.
+
+
+321    -    987    =
+  321. 321.   987. -666.   << uncertain if [-   666.] or [   -666.]
+
+
+2  +  4  =  =   =
+2. 2. 4. 6. 10. 14.
+
+
+20   -   4  =   =   =
+ 20. 20. 4. 16. 12. 8.
+
+
+12.4    *    3.651     =
+   12.4 12.4     3.651 45.2724
+
+
+456.3     *     3  *      .12    =
+    456.3 456.3 3. 1368.9   0.12 164.268
+
+
+168    /    56   =
+  168. 168.  56. 3.
+
+
+24   /   2  /   3  =
+ 24. 24. 2. 12. 3. 4.
+
+
+2  *  8  /   2  +  4  -   6  =
+2. 2. 8. 16. 2. 8. 4. 12. 6. 6.
+
+
+23   *   =
+ 23. 23. 529.
+
+
+23   *   =    =
+ 23. 23. 529. 12167.
+
+
+6  *  18   =    3  =   5  =
+6. 6.  18. 108. 3. 54. 5. 90.
+
+
+58   /   5  =    36   =   63   =
+ 58. 58. 5. 11.6  36. 7.2  63. 12.6
+
+
+125    *    5  %
+  125. 125. 5. 6.25
+
+
+125    +    5  %    =
+  125. 125. 5. 6.25 131.25
+
+
+125    -    5  %    =
+  125. 125. 5. 6.25 118.75
+*/
+
+/*
+from the back cover of b3-23:
+
+C 123    +    456    =
+    123. 123.   456. 579.
+
+
+C 2  +  3  +  5  -   16   =
+  2. 2. 3. 5. 5. 10.  16. -6.
+
+
+C 2.3   *   4.5   =
+    2.3 2.3   4.5 10.35
+
+
+C 22   /   7  =
+   22. 22. 7. 3.1428571
+
+
+C 25   *   =
+   25. 25. 625.
+
+
+C 3  *  =  =   =   =
+  3. 3. 9. 27. 81. 243.
+
+
+C -  4  *   =   =
+  0. 4. -4. 16. -64.        << uncertain what would be [ - 4 * = = = ]
+
+
+C 2  +  3  *  5  /   4  -    3.25    =  *  =  =
+  2. 2. 3. 5. 5. 25. 4. 6.25    3.25 3. 3. 9. 27.
+
+
+C 6  *  12   =   7  =
+  6. 6.  12. 72. 7. 84.
+
+
+C 60   /   5  =   35   =
+   60. 60. 5. 12.  35. 7.
+
+
+C 5  *  6  =   *   6  %
+  5. 5. 6. 30. 30. 6. 1.8       ~ 30 * (6 / 100)
+
+
+C 5  *  6  =   /   6  %
+  5. 5. 6. 30. 30. 6. 500.      ~ 30 / (6 / 100)
+*/
+
+/*
+from video:
+
+20   +   5  %  =   +   5  %    =
+ 20. 20. 5. 1. 21. 21. 5. 1.05 22.05
+
+
+5 * 55   C ..... ?      << clarify
+5    55. 0.
+
+
+11111111 ... 1
+             11111111.
+
+
+11111111 * 55555555 = C
+                      6172839.3
+
+
+... / 0 =
+        0.0.0.0.0.0.0.0.
+
+
+100    * 100    %    =      % =
+  100.     100. 100. 10000.   1000000.
+
+
+0.5   * 0  2  =
+  0.5   0. 2. 1.
+
+
+12345679 * 9 = C
+               1.1111111
+
+
+12345678 + 9999 =
+                12355677.
+*/
+
+/*
+after [=] is pressed == initial state
+except, after [=] there may be [op-code and 2nd-argument] and a non-zero indication
+
+error state == initial state
+but all points are lit and the keyboard is locked except the C key
+
+first-digit-is-entered
+
+initial state:
+- C -- clear all ? does it clear the 2nd register and op-code ?
+- 0, 1..9, P -- clear IND, then:
+  - 0 -- do nothing
+  - 1..9 -- shift and enter 1..9
+  - P -- set P=1 flag
+- X -- ... ?
+- = -- ... ?
+*/
