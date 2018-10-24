@@ -19,7 +19,7 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-#include "simulator-b3-23.h"
+#include "simul.h"
 
 struct reg_s reg_1;
 struct reg_s reg_2;

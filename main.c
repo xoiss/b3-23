@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "adapter-b3-23-console.h"
+#include "adcon.h"
 
 enum message_e { HELLO, BYE, PROMPT };
 

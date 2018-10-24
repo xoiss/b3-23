@@ -19,8 +19,8 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-#ifndef SIMULATOR_B3_23_H_
-#define SIMULATOR_B3_23_H_
+#ifndef SIMUL_H_
+#define SIMUL_H_
 
 enum key_e {
     KEY_C,
@@ -68,4 +68,4 @@ extern struct control_s control;
 
 extern void key_pressed(enum key_e key);
 
-#endif /* SIMULATOR_B3_23_H_ */
+#endif /* SIMUL_H_ */

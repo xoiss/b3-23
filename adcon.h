@@ -19,8 +19,8 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-#ifndef ADAPTER_B3_23_CONSOLE_H_
-#define ADAPTER_B3_23_CONSOLE_H_
+#ifndef ADCON_H_
+#define ADCON_H_
 
 #define TARGET "Elektronika B3-23"
 #define KEYS "C 0 1 2 3 4 5 6 7 8 9 . , + - * / % ="
@@ -29,4 +29,4 @@
 extern int process_key(char *c);
 extern const char *print_state(void);
 
-#endif /* ADAPTER_B3_23_CONSOLE_H_ */
+#endif /* ADCON_H_ */

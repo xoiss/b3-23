@@ -19,9 +19,9 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-#include "adapter-b3-23-console.h"
+#include "adcon.h"
 
-#include "simulator-b3-23.h"
+#include "simul.h"
 
 static const struct { char c; enum key_e key; } char2key[] = {
     { 'C', KEY_C }, { 'c', KEY_C }, { '%', KEY_PCT }, { '+', KEY_ADD },
