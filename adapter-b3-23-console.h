@@ -18,14 +18,14 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-#ifndef ADAPTER_B3_23_CONSOLE_H_
+#ifndef ADAPTER_B3_23_CONSOLE_H_                                                /* TODO: (K&R), (RT-11) limit file names to 6 symbols */
 #define ADAPTER_B3_23_CONSOLE_H_
 
-#define TARGET "Elektronika B3-23"
+#define TARGET "Elektronika B3-23"                                              /* TODO: prepend with AD_ */
 #define KEYS "C 0 1 2 3 4 5 6 7 8 9 . , + - * / % ="
 #define STATE "indicator and second registers, operational triggers"
 
-extern int process_key(char *c);
-extern const char *print_state(void);
-
+extern int process_key(char *c);                                                /* TODO: (PDP-11) return char or NULL, don't modify the argument */
+extern const char *print_state(void);                                           /* TODO: (K&R) remove const; (PDP-11) publish the buffer, don't return a pointer */
+                                                                                /* TODO: (K&R), (RT-11) limit identifiers to 6 symbols; (K&R) remove parameters */
 #endif /* ADAPTER_B3_23_CONSOLE_H_ */
