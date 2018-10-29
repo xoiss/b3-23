@@ -37,8 +37,6 @@
 
 #include "adcon.h"
 
-enum message_e { HELLO, BYE, PROMPT };
-
 #if NIX_POSIX
 #define SEND_EOF "Ctrl+D at a new line, or Ctrl+C, or"
 #endif
@@ -52,43 +50,25 @@ enum message_e { HELLO, BYE, PROMPT };
 #define SEND_EOF "... hmmm,"
 #endif
 
-static const char *const messages[] = {
-
-    /* HELLO */
-    TARGET " simulator.\n"
-    "Type in a sequence of keystrokes and hit ENTER to confirm.\n"
-    "The following keys are recognized:\n"
-    "  " KEYS "\n"
-    "Simulator will process them one-by-one and print the state:\n"
-    "  " STATE "\n"
-    "To cancel press " SEND_EOF " whatever you have.\n"
-    "Enjoy! Best regards, xoiss, Moscow, 2018.\n",
-
-    /* BYE */
-    "\nSee you!\n"
-    "And visit: http://www.phantom.sannata.ru/forum/\n",
-
-    /* PROMPT */
-    "> "
-};
-
 static int hide_dialogs;
 
 static int isinteractive(void);
 static int isendofstream(void);
 
-static void print_message(enum message_e message_id);
+static void print_hello(void);
+static void print_prompt(void);
+static void print_bye(void);
 static void process_input(void);
 
 int main(void)
 {
     hide_dialogs = !isinteractive();
-    print_message(HELLO);
+    print_hello();
     while (!isendofstream()) {
-        print_message(PROMPT);
+        print_prompt();
         process_input();
     }
-    print_message(BYE);
+    print_bye();
     return EXIT_SUCCESS;
 }
 
@@ -113,10 +93,40 @@ static int isendofstream(void)
     return ferror(stdin) || feof(stdin);
 }
 
-static void print_message(enum message_e message_id)
+static void print_hello(void)
 {
     if (!hide_dialogs) {
-        fputs(messages[message_id], stdout);
+        fputs(TARGET, stdout);
+        fputs(" simulator.\n\
+Type in a sequence of keystrokes and hit ENTER to confirm.\n\
+The following keys are recognized:\n  ", stdout);
+        fputs(KEYS, stdout);
+        fputs("\n\
+Simulator will process them one-by-one and print the state:\n  ",
+stdout);
+        fputs(STATE, stdout);
+        fputs("\nTo cancel press ", stdout);
+        fputs(SEND_EOF, stdout);
+        fputs(" whatever you have.\n\
+Enjoy! Best regards, xoiss, Moscow, 2018.\n", stdout);
+        fflush(stdout);
+    }
+}
+
+static void print_prompt(void)
+{
+    if (!hide_dialogs) {
+        fputs("> ", stdout);
+        fflush(stdout);
+    }
+}
+
+static void print_bye(void)
+{
+    if (!hide_dialogs) {
+        fputs("\n\
+See you!\n\
+And visit: http://www.phantom.sannata.ru/forum/\n", stdout);
         fflush(stdout);
     }
 }
