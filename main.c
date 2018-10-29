@@ -133,16 +133,11 @@ And visit: http://www.phantom.sannata.ru/forum/\n", stdout);
 
 static void prc_input(void)
 {
-    char s[256], *p, c;
-    while ((p = fgets(s, sizeof s, stdin)) != NULL) {
-        while ((c = *p++) != '\0') {
-            if (c == '\n') {
-                return;
-            }
-            if (prc_key(&c)) {
-                fprintf(stdout, "[%c] => %s\n", c, prt_state());
-                fflush(stdout);
-            }
+    char c;
+    while ((c = (char)fgetc(stdin)) != EOF && c != '\n') {
+        if (prc_key(&c)) {
+            fprintf(stdout, "[%c] => %s\n", c, prt_state());
+            fflush(stdout);
         }
     }
 }

@@ -38,6 +38,7 @@
 #else
 #define void
 #define const
+#define fgetc getc
 #if RT11_LEGACY
 #define EXIT_SUCCESS (1)
 #define EXIT_FAILURE (4)
