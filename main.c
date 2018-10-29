@@ -136,7 +136,11 @@ static void prc_input(void)
     char c;
     while ((c = (char)fgetc(stdin)) != EOF && c != '\n') {
         if (prc_key(&c)) {
-            fprintf(stdout, "[%c] => %s\n", c, prt_state());
+            fputc('[', stdout);
+            fputc(c, stdout);
+            fputs("] => ", stdout);
+            fputs(prt_state(), stdout);
+            fputc('\n', stdout);
             fflush(stdout);
         }
     }
