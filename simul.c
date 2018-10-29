@@ -28,29 +28,29 @@ struct control_s control;
 
 enum mode_e { MD_EQU, MD_PCT };
 
-static void process_clear();
-static void process_number();
-static void process_point();
-static void process_function();
-static void process_equal();
-static void process_percent();
+static void prc_clear();
+static void prc_number();
+static void prc_point();
+static void prc_function();
+static void prc_equal();
+static void prc_percent();
 
 static void clear_all();
 static void clear_display();
 static void enter_number();
-static void normalize_display();
+static void norm_display();
 static void push_argument();
-static void exchange_arguments();
+static void exch_arguments();
 static int calculate();
 static int isrepeated();
 static int ispercentage();
 static enum func_e getfunc();
 static void setmode();
 
-static int calculate_add();
-static int calculate_sub();
-static int calculate_mul();
-static int calculate_div();
+static int calc_add();
+static int calc_sub();
+static int calc_mul();
+static int calc_div();
 
 static int iszero();
 static void clear();
@@ -63,8 +63,8 @@ static int compare();
 static void exchange();
 static int add();
 static int sub();
-static int islimit_left();
-static int islimit_right();
+static int is_left();
+static int is_right();
 static void shift_left();
 static void shift_right();
 
@@ -72,7 +72,7 @@ void key_pressed(key)
     enum key_e key;
 {
     if (key == KEY_C) {
-        process_clear();
+        prc_clear();
         return;
     }
     if (control.state == ST_ERROR) {
@@ -81,26 +81,26 @@ void key_pressed(key)
     switch (key) {
     case KEY_0: case KEY_1: case KEY_2: case KEY_3: case KEY_4:
     case KEY_5: case KEY_6: case KEY_7: case KEY_8: case KEY_9:
-        process_number(key);
+        prc_number(key);
         break;
     case KEY_P:
-        process_point();
+        prc_point();
         break;
     case KEY_ADD: case KEY_SUB: case KEY_MUL: case KEY_DIV:
-        process_function(key);
+        prc_function(key);
         break;
     case KEY_EQU:
-        process_equal();
+        prc_equal();
         break;
     case KEY_PCT:
-        process_percent();
+        prc_percent();
         break;
     default:
         break;
     }
 }
 
-static void process_clear(void)
+static void prc_clear(void)
 {
     switch (control.state) {
     case ST_READY:
@@ -115,7 +115,7 @@ static void process_clear(void)
     control.state = ST_READY;
 }
 
-static void process_number(key)
+static void prc_number(key)
     enum key_e key;
 {
     if (control.state == ST_READY) {
@@ -125,7 +125,7 @@ static void process_number(key)
     enter_number((int)(key - KEY_0));
 }
 
-static void process_point(void)
+static void prc_point(void)
 {
     if (control.state == ST_READY) {
         clear_display();
@@ -133,14 +133,14 @@ static void process_point(void)
     control.state = ST_FRAC;
 }
 
-static void process_function(key)
+static void prc_function(key)
     enum key_e key;
 {
     if (isrepeated()) {
         control.func = FN_NOP;
     }
     if (control.state != ST_READY) {
-        process_equal();
+        prc_equal();
     }
     if (isrepeated() || control.func == FN_NOP) {
         push_argument();
@@ -148,23 +148,23 @@ static void process_function(key)
     control.func = (key - KEY_ADD + FN_ADD);
 }
 
-static void process_equal(void)
+static void prc_equal(void)
 {
     int error;
-    normalize_display();
+    norm_display();
     if (!isrepeated() && control.func != FN_NOP) {
-        exchange_arguments();
+        exch_arguments();
     }
     error = calculate(MD_EQU);
     control.state = error ? ST_ERROR : ST_READY;
 }
 
-static void process_percent(void)
+static void prc_percent(void)
 {
     int error;
-    normalize_display();
+    norm_display();
     if (control.func == FN_MUL || control.func == FN_DIV) {
-        exchange_arguments();
+        exch_arguments();
     }
     error = calculate(MD_PCT);
     control.state = error ? ST_ERROR : ST_READY;
@@ -185,14 +185,14 @@ static void clear_display(void)
 static void enter_number(digit)
     int digit;
 {
-    if (!islimit_left(&reg_1)) {
+    if (!is_left(&reg_1)) {
         shift_left(&reg_1);
         reg_1.d[0] = digit;
         reg_1.exp += (control.state == ST_FRAC);
     }
 }
 
-static void normalize_display(void)
+static void norm_display(void)
 {
     normalize(&reg_1);
 }
@@ -202,7 +202,7 @@ static void push_argument(void)
     reg_2 = reg_1;
 }
 
-static void exchange_arguments(void)
+static void exch_arguments(void)
 {
     exchange(&reg_1, &reg_2);
 }
@@ -214,24 +214,24 @@ static int calculate(mode)
     if (mode == MD_EQU) {
         switch (getfunc()) {
         case FN_ADD:
-            error = calculate_add();
+            error = calc_add();
             break;
         case FN_SUB:
-            error = calculate_sub();
+            error = calc_sub();
             reg_1.neg ^= ispercentage();
             break;
         case FN_MUL:
             if (!ispercentage()) {
-                error = calculate_mul(MD_EQU);
+                error = calc_mul(MD_EQU);
             } else {
-                error = calculate_div(MD_PCT);
+                error = calc_div(MD_PCT);
             }
             break;
         case FN_DIV:
             if (!ispercentage()) {
-                error = calculate_div(MD_EQU);
+                error = calc_div(MD_EQU);
             } else {
-                error = calculate_mul(MD_PCT);
+                error = calc_mul(MD_PCT);
             }
             break;
         default:
@@ -240,10 +240,10 @@ static int calculate(mode)
     } else {
         switch (getfunc()) {
         case FN_ADD: case FN_SUB: case FN_MUL:
-            error = calculate_mul(MD_PCT);
+            error = calc_mul(MD_PCT);
             break;
         case FN_DIV:
-            error = calculate_div(MD_PCT);
+            error = calc_div(MD_PCT);
             break;
         default:
             return 0;
@@ -251,7 +251,7 @@ static int calculate(mode)
     }
     setmode(mode);
     if (!error) {
-        normalize_display();
+        norm_display();
     }
     return error;
 }
@@ -289,7 +289,7 @@ static void setmode(mode)
     control.func = func;
 }
 
-static int calculate_add(void)
+static int calc_add(void)
 {
     int carry, borrow, reg_1b;
     struct reg_s reg_2b;
@@ -334,16 +334,16 @@ static int calculate_add(void)
     return 0;
 }
 
-static int calculate_sub(void)
+static int calc_sub(void)
 {
     int error;
     reg_2.neg = !reg_2.neg;
-    error = calculate_add();
+    error = calc_add();
     reg_2.neg = !reg_2.neg;
     return error;
 }
 
-static int calculate_mul(mode)
+static int calc_mul(mode)
     enum mode_e mode;
 {
     int i, digit, carry = 0, exp_2 = reg_2.exp;
@@ -378,7 +378,7 @@ static int calculate_mul(mode)
     return 0;
 }
 
-static int calculate_div(mode)
+static int calc_div(mode)
     enum mode_e mode;
 {
     int i, digit, borrow, reg_1b = 0, exp_2 = reg_2.exp;
@@ -461,7 +461,7 @@ static void clear(reg)
 static void normalize(reg)
     struct reg_s *reg;
 {
-    while (!islimit_right(reg)) {
+    while (!is_right(reg)) {
         shift_right(reg);
         reg->exp -= 1;
     }
@@ -473,7 +473,7 @@ static void normalize(reg)
 static void denormalize(reg)
     struct reg_s *reg;
 {
-    while (!islimit_left(reg)) {
+    while (!is_left(reg)) {
         shift_left(reg);
         reg->exp += 1;
     }
@@ -573,13 +573,13 @@ static int sub(reg_dst, reg_src)
     return borrow;
 }
 
-static int islimit_left(reg)
+static int is_left(reg)
     struct reg_s *reg;
 {
     return reg->d[WIDTH - 1] != 0 || reg->exp == WIDTH - 1;
 }
 
-static int islimit_right(reg)
+static int is_right(reg)
     struct reg_s *reg;
 {
     return reg->d[0] != 0 || reg->exp == 0;

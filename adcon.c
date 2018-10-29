@@ -59,7 +59,7 @@ static const struct { enum func_e func_md; char c_md; } mode2char[] = {
 static void print_display();
 static void print_register();
 
-int process_key(c)
+int prc_key(c)
     char *c;
 {
     enum key_e key;

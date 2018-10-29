@@ -58,7 +58,7 @@ static int isendofstream();
 static void print_hello();
 static void print_prompt();
 static void print_bye();
-static void process_input();
+static void prc_input();
 
 int main(void)
 {
@@ -66,7 +66,7 @@ int main(void)
     print_hello();
     while (!isendofstream()) {
         print_prompt();
-        process_input();
+        prc_input();
     }
     print_bye();
     return EXIT_SUCCESS;
@@ -131,7 +131,7 @@ And visit: http://www.phantom.sannata.ru/forum/\n", stdout);
     }
 }
 
-static void process_input(void)
+static void prc_input(void)
 {
     char s[256], *p, c;
     while ((p = fgets(s, sizeof s, stdin)) != NULL) {
@@ -139,7 +139,7 @@ static void process_input(void)
             if (c == '\n') {
                 return;
             }
-            if (process_key(&c)) {
+            if (prc_key(&c)) {
                 fprintf(stdout, "[%c] => %s\n", c, print_state());
                 fflush(stdout);
             }
