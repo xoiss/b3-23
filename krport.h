@@ -32,4 +32,19 @@
 #define RT11_LEGACY (1)
 #endif
 
+#ifdef __STDC__
+#define void void
+#define const const
+#else
+#define void
+#define const
+#if RT11_LEGACY
+#define EXIT_SUCCESS (1)
+#define EXIT_FAILURE (4)
+#else
+#define EXIT_SUCCESS
+#define EXIT_FAILURE
+#endif
+#endif
+
 #endif /* KRPORT_H_ */

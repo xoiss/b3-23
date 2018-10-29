@@ -22,6 +22,8 @@
 #ifndef SIMUL_H_
 #define SIMUL_H_
 
+#include "krport.h"
+
 enum key_e {
     KEY_C,
     KEY_0, KEY_1, KEY_2, KEY_3, KEY_4,
