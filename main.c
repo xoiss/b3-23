@@ -41,9 +41,11 @@ enum message_e { HELLO, BYE, PROMPT };
 
 #if NIX_POSIX
 #define SEND_EOF "Ctrl+D at a new line, or "
-#elif WIN_POSIX
+#endif
+#if WIN_POSIX
 #define SEND_EOF "Ctrl+Z at a new line and then ENTER, or "
-#else
+#endif
+#ifndef SEND_EOF
 #define SEND_EOF ""
 #endif
 
