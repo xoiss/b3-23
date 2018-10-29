@@ -68,7 +68,8 @@ static int islimit_right();
 static void shift_left();
 static void shift_right();
 
-void key_pressed(enum key_e key)
+void key_pressed(key)
+    enum key_e key;
 {
     if (key == KEY_C) {
         process_clear();
@@ -114,7 +115,8 @@ static void process_clear(void)
     control.state = ST_READY;
 }
 
-static void process_number(enum key_e key)
+static void process_number(key)
+    enum key_e key;
 {
     if (control.state == ST_READY) {
         clear_display();
@@ -131,7 +133,8 @@ static void process_point(void)
     control.state = ST_FRAC;
 }
 
-static void process_function(enum key_e key)
+static void process_function(key)
+    enum key_e key;
 {
     if (isrepeated()) {
         control.func = FN_NOP;
@@ -179,7 +182,8 @@ static void clear_display(void)
     clear(&reg_1);
 }
 
-static void enter_number(int digit)
+static void enter_number(digit)
+    int digit;
 {
     if (!islimit_left(&reg_1)) {
         shift_left(&reg_1);
@@ -203,7 +207,8 @@ static void exchange_arguments(void)
     exchange(&reg_1, &reg_2);
 }
 
-static int calculate(enum mode_e mode)
+static int calculate(mode)
+    enum mode_e mode;
 {
     int error;
     if (mode == MD_EQU) {
@@ -272,7 +277,8 @@ static enum func_e getfunc(void)
     return func;
 }
 
-static void setmode(enum mode_e mode)
+static void setmode(mode)
+    enum mode_e mode;
 {
     enum func_e func = getfunc();
     if (mode == MD_PCT) {
@@ -336,7 +342,8 @@ static int calculate_sub(void)
     return error;
 }
 
-static int calculate_mul(enum mode_e mode)
+static int calculate_mul(mode)
+    enum mode_e mode;
 {
     int i, digit, carry = 0, exp_2 = reg_2.exp;
     struct reg_s reg_p;
@@ -370,7 +377,8 @@ static int calculate_mul(enum mode_e mode)
     return 0;
 }
 
-static int calculate_div(enum mode_e mode)
+static int calculate_div(mode)
+    enum mode_e mode;
 {
     int i, digit, borrow, reg_1b = 0, exp_2 = reg_2.exp;
     struct reg_s reg_q;
@@ -426,7 +434,8 @@ static int calculate_div(enum mode_e mode)
     return 0;
 }
 
-static int iszero(struct reg_s *reg)
+static int iszero(reg)
+    struct reg_s *reg;
 {
     int i;
     for (i = 0; i < WIDTH; ++i) {
@@ -437,7 +446,8 @@ static int iszero(struct reg_s *reg)
     return 1;
 }
 
-static void clear(struct reg_s *reg)
+static void clear(reg)
+    struct reg_s *reg;
 {
     int i;
     for (i = 0; i < WIDTH; ++i) {
@@ -447,7 +457,8 @@ static void clear(struct reg_s *reg)
     reg->neg = 0;
 }
 
-static void normalize(struct reg_s *reg)
+static void normalize(reg)
+    struct reg_s *reg;
 {
     while (!islimit_right(reg)) {
         shift_right(reg);
@@ -458,7 +469,8 @@ static void normalize(struct reg_s *reg)
     }
 }
 
-static void denormalize(struct reg_s *reg)
+static void denormalize(reg)
+    struct reg_s *reg;
 {
     while (!islimit_left(reg)) {
         shift_left(reg);
@@ -466,7 +478,8 @@ static void denormalize(struct reg_s *reg)
     }
 }
 
-static int justify(struct reg_s *reg)
+static int justify(reg)
+    struct reg_s *reg;
 {
     int exp = reg->exp;
     reg->exp = 0;
@@ -474,7 +487,8 @@ static int justify(struct reg_s *reg)
     return exp + reg->exp;
 }
 
-static void round(struct reg_s *reg)
+static void round(reg)
+    struct reg_s *reg;
 {
     while (reg->exp >= WIDTH) {
         shift_right(reg);
@@ -482,7 +496,9 @@ static void round(struct reg_s *reg)
     }
 }
 
-static void equalize(struct reg_s *reg_a, struct reg_s *reg_b)
+static void equalize(reg_a, reg_b)
+    struct reg_s *reg_a;
+    struct reg_s *reg_b;
 {
     while (reg_a->exp > reg_b->exp) {
         shift_right(reg_a);
@@ -494,7 +510,9 @@ static void equalize(struct reg_s *reg_a, struct reg_s *reg_b)
     }
 }
 
-static int compare(struct reg_s *reg_a, struct reg_s *reg_b)
+static int compare(reg_a, reg_b)
+    struct reg_s *reg_a;
+    struct reg_s *reg_b;
 {
     int i;
     for (i = WIDTH - 1; i >= 0; --i) {
@@ -508,14 +526,18 @@ static int compare(struct reg_s *reg_a, struct reg_s *reg_b)
     return 0;
 }
 
-static void exchange(struct reg_s *reg_a, struct reg_s *reg_b)
+static void exchange(reg_a, reg_b)
+    struct reg_s *reg_a;
+    struct reg_s *reg_b;
 {
     struct reg_s reg_x = *reg_b;
     *reg_b = *reg_a;
     *reg_a = reg_x;
 }
 
-static int add(struct reg_s *reg_dst, struct reg_s *reg_src)
+static int add(reg_dst, reg_src)
+    struct reg_s *reg_dst;
+    struct reg_s *reg_src;
 {
     int i, digit, carry = 0;
     for (i = 0; i < WIDTH; ++i) {
@@ -531,7 +553,9 @@ static int add(struct reg_s *reg_dst, struct reg_s *reg_src)
     return carry;
 }
 
-static int sub(struct reg_s *reg_dst, struct reg_s *reg_src)
+static int sub(reg_dst, reg_src)
+    struct reg_s *reg_dst;
+    struct reg_s *reg_src;
 {
     int i, digit, borrow = 0;
     for (i = 0; i < WIDTH; ++i) {
@@ -547,17 +571,20 @@ static int sub(struct reg_s *reg_dst, struct reg_s *reg_src)
     return borrow;
 }
 
-static int islimit_left(struct reg_s *reg)
+static int islimit_left(reg)
+    struct reg_s *reg;
 {
     return reg->d[WIDTH - 1] != 0 || reg->exp == WIDTH - 1;
 }
 
-static int islimit_right(struct reg_s *reg)
+static int islimit_right(reg)
+    struct reg_s *reg;
 {
     return reg->d[0] != 0 || reg->exp == 0;
 }
 
-static void shift_left(struct reg_s *reg)
+static void shift_left(reg)
+    struct reg_s *reg;
 {
     int i;
     for (i = WIDTH - 1; i > 0; --i) {
@@ -566,7 +593,8 @@ static void shift_left(struct reg_s *reg)
     reg->d[0] = 0;
 }
 
-static void shift_right(struct reg_s *reg)
+static void shift_right(reg)
+    struct reg_s *reg;
 {
     int i, digit, carry;
     carry = (reg->d[0] >= 5);

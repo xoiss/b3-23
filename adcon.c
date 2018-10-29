@@ -59,7 +59,8 @@ static const struct { enum func_e func; char c; } mode2char[] = {
 static void print_display();
 static void print_register();
 
-int process_key(char *c)
+int process_key(c)
+    char *c;
 {
     enum key_e key;
     unsigned i;
@@ -122,7 +123,8 @@ const char *print_state(void)
     return s;
 }
 
-static void print_display(char **p)
+static void print_display(p)
+    char **p;
 {
     /* "-  0. 0. 0. 0. 0. 0. 0. 0. " */
     int e = 0;
@@ -141,7 +143,9 @@ static void print_display(char **p)
     }
 }
 
-static void print_register(char **p, struct reg_s *reg)
+static void print_register(p, reg)
+    char **p;
+    struct reg_s *reg;
 {
     /* "+0000000." */
     int i;
