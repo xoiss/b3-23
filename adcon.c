@@ -23,7 +23,7 @@
 
 #include "simul.h"
 
-static const struct { char c; enum key_e key; } char2key[] = {
+static const struct { char c_key; enum key_e key; } char2key[] = {
     { 'C', KEY_C }, { 'c', KEY_C }, { '%', KEY_PCT }, { '+', KEY_ADD },
     { '7', KEY_7 }, { '8', KEY_8 }, { '9', KEY_9 },   { '-', KEY_SUB },
     { '4', KEY_4 }, { '5', KEY_5 }, { '6', KEY_6 },   { '*', KEY_MUL },
@@ -31,14 +31,14 @@ static const struct { char c; enum key_e key; } char2key[] = {
     { '0', KEY_0 }, { '.', KEY_P }, { ',', KEY_P },   { '=', KEY_EQU },
 };
 
-static const struct { enum state_e state; char c; } state2char[] = {
+static const struct { enum state_e state; char c_st; } state2char[] = {
     { ST_READY, 'R' },
     { ST_INT, 'I' },
     { ST_FRAC, 'F' },
     { ST_ERROR, 'E' },
 };
 
-static const struct { enum func_e func; char c; } func2char[] = {
+static const struct { enum func_e func_op; char c_op; } func2char[] = {
     { FN_NOP, ' ' },
     { FN_ADD, '+' }, { FN_SUB, '-' }, { FN_MUL, '*' }, { FN_DIV, '/' },
     { FN_REP_ADD, '+' }, { FN_REP_SUB, '-' },
@@ -47,7 +47,7 @@ static const struct { enum func_e func; char c; } func2char[] = {
     { FN_PCT_MUL, '*' }, { FN_PCT_DIV, '/' },
 };
 
-static const struct { enum func_e func; char c; } mode2char[] = {
+static const struct { enum func_e func_md; char c_md; } mode2char[] = {
     { FN_NOP, ' ' },
     { FN_ADD, ' ' }, { FN_SUB, ' ' }, { FN_MUL, ' ' }, { FN_DIV, ' ' },
     { FN_REP_ADD, 'K' }, { FN_REP_SUB, 'K' },
@@ -65,12 +65,12 @@ int process_key(c)
     enum key_e key;
     unsigned i;
     for (i = 0; i < sizeof char2key / sizeof char2key[0]; ++i) {
-        if (char2key[i].c == *c) {
+        if (char2key[i].c_key == *c) {
             key = char2key[i].key;
             key_pressed(key);
             while (i-- > 0) {
                 if (char2key[i].key == key) {
-                    *c = char2key[i].c;
+                    *c = char2key[i].c_key;
                 }
             }
             return 1;
@@ -87,17 +87,17 @@ const char *print_state(void)
     unsigned i;
     for (i = 0; i < sizeof state2char / sizeof state2char[0]; ++i) {
         if (state2char[i].state == control.state) {
-            state_c = state2char[i].c;
+            state_c = state2char[i].c_st;
         }
     }
     for (i = 0; i < sizeof func2char / sizeof func2char[0]; ++i) {
-        if (func2char[i].func == control.func) {
-            func_c = func2char[i].c;
+        if (func2char[i].func_op == control.func) {
+            func_c = func2char[i].c_op;
         }
     }
     for (i = 0; i < sizeof mode2char / sizeof mode2char[0]; ++i) {
-        if (mode2char[i].func == control.func) {
-            mode_c = mode2char[i].c;
+        if (mode2char[i].func_md == control.func) {
+            mode_c = mode2char[i].c_md;
         }
     }
     *p++ = '[';
