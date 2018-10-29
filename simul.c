@@ -292,7 +292,8 @@ static void setmode(mode)
 static int calculate_add(void)
 {
     int carry, borrow, reg_1b;
-    struct reg_s reg_2b = reg_2;
+    struct reg_s reg_2b;
+    reg_2b = reg_2;
     denormalize(&reg_1);
     denormalize(&reg_2b);
     if (reg_1.neg == reg_2b.neg) {
@@ -530,7 +531,8 @@ static void exchange(reg_a, reg_b)
     struct reg_s *reg_a;
     struct reg_s *reg_b;
 {
-    struct reg_s reg_x = *reg_b;
+    struct reg_s reg_x;
+    reg_x = *reg_b;
     *reg_b = *reg_a;
     *reg_a = reg_x;
 }
