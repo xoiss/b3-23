@@ -40,13 +40,16 @@
 enum message_e { HELLO, BYE, PROMPT };
 
 #if NIX_POSIX
-#define SEND_EOF "Ctrl+D at a new line, or "
+#define SEND_EOF "Ctrl+D at a new line, or Ctrl+C, or"
 #endif
 #if WIN_POSIX
-#define SEND_EOF "Ctrl+Z at a new line and then ENTER, or "
+#define SEND_EOF "Ctrl+Z at a new line and then ENTER, or Ctrl+C, or"
+#endif
+#if RT11_LEGACY
+#define SEND_EOF "CTRL/Z at a new line, or CTRL/C, or"
 #endif
 #ifndef SEND_EOF
-#define SEND_EOF ""
+#define SEND_EOF "... hmmm,"
 #endif
 
 static const char *const messages[] = {
@@ -58,7 +61,7 @@ static const char *const messages[] = {
     "  " KEYS "\n"
     "Simulator will process them one-by-one and print the state:\n"
     "  " STATE "\n"
-    "To cancel press " SEND_EOF "Ctrl+C, or whatever you have.\n"
+    "To cancel press " SEND_EOF " whatever you have.\n"
     "Enjoy! Best regards, xoiss, Moscow, 2018.\n",
 
     /* BYE */
