@@ -28,45 +28,45 @@ struct control_s control;
 
 enum mode_e { MD_EQU, MD_PCT };
 
-static void process_clear(void);
-static void process_number(enum key_e key);
-static void process_point(void);
-static void process_function(enum key_e key);
-static void process_equal(void);
-static void process_percent(void);
+static void process_clear();
+static void process_number();
+static void process_point();
+static void process_function();
+static void process_equal();
+static void process_percent();
 
-static void clear_all(void);
-static void clear_display(void);
-static void enter_number(int digit);
-static void normalize_display(void);
-static void push_argument(void);
-static void exchange_arguments(void);
-static int calculate(enum mode_e mode);
-static int isrepeated(void);
-static int ispercentage(void);
-static enum func_e getfunc(void);
-static void setmode(enum mode_e mode);
+static void clear_all();
+static void clear_display();
+static void enter_number();
+static void normalize_display();
+static void push_argument();
+static void exchange_arguments();
+static int calculate();
+static int isrepeated();
+static int ispercentage();
+static enum func_e getfunc();
+static void setmode();
 
-static int calculate_add(void);
-static int calculate_sub(void);
-static int calculate_mul(enum mode_e mode);
-static int calculate_div(enum mode_e mode);
+static int calculate_add();
+static int calculate_sub();
+static int calculate_mul();
+static int calculate_div();
 
-static int iszero(struct reg_s *reg);
-static void clear(struct reg_s *reg);
-static void normalize(struct reg_s *reg);
-static void denormalize(struct reg_s *reg);
-static int justify(struct reg_s *reg);
-static void round(struct reg_s *reg);
-static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
-static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
-static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
-static int add(struct reg_s *reg_dst, struct reg_s *reg_src);
-static int sub(struct reg_s *reg_dst, struct reg_s *reg_src);
-static int islimit_left(struct reg_s *reg);
-static int islimit_right(struct reg_s *reg);
-static void shift_left(struct reg_s *reg);
-static void shift_right(struct reg_s *reg);
+static int iszero();
+static void clear();
+static void normalize();
+static void denormalize();
+static int justify();
+static void round();
+static void equalize();
+static int compare();
+static void exchange();
+static int add();
+static int sub();
+static int islimit_left();
+static int islimit_right();
+static void shift_left();
+static void shift_right();
 
 void key_pressed(enum key_e key)
 {

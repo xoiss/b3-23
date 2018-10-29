@@ -52,13 +52,13 @@
 
 static int hide_dialogs;
 
-static int isinteractive(void);
-static int isendofstream(void);
+static int isinteractive();
+static int isendofstream();
 
-static void print_hello(void);
-static void print_prompt(void);
-static void print_bye(void);
-static void process_input(void);
+static void print_hello();
+static void print_prompt();
+static void print_bye();
+static void process_input();
 
 int main(void)
 {

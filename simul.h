@@ -68,6 +68,6 @@ struct control_s {
 
 extern struct control_s control;
 
-extern void key_pressed(enum key_e key);
+extern void key_pressed();
 
 #endif /* SIMUL_H_ */

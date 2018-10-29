@@ -56,8 +56,8 @@ static const struct { enum func_e func; char c; } mode2char[] = {
     { FN_PCT_MUL, '%' }, { FN_PCT_DIV, '%' },
 };
 
-static void print_display(char **p);
-static void print_register(char **p, struct reg_s *reg);
+static void print_display();
+static void print_register();
 
 int process_key(char *c)
 {
