@@ -19,22 +19,29 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
+#include "krport.h"
+
+#if NIX_POSIX || WIN_POSIX
 #undef __STRICT_ANSI__
 #define _POSIX_SOURCE
+#endif
 
+#if NIX_POSIX || WIN_POSIX
 #include <errno.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#endif
+
+#include <stdio.h>
 
 #include "adcon.h"
 
 enum message_e { HELLO, BYE, PROMPT };
 
-#if __linux__ || __unix__
+#if NIX_POSIX
 #define SEND_EOF "Ctrl+D at a new line, or "
-#elif __WINNT__  && __MINGW32__
+#elif WIN_POSIX
 #define SEND_EOF "Ctrl+Z at a new line and then ENTER, or "
 #else
 #define SEND_EOF ""
@@ -82,8 +89,9 @@ int main(void)
 
 static int isinteractive(void)
 {
+#if NIX_POSIX || WIN_POSIX
     if (isatty(fileno(stdin)) == 0) {
-#if __linux__ || __unix__
+#if NIX_POSIX
         if (errno != EINVAL && errno != ENOTTY) {
             perror("isatty");
             exit(EXIT_FAILURE);
@@ -91,6 +99,7 @@ static int isinteractive(void)
 #endif
         return 0;
     }
+#endif
     return 1;
 }
 
