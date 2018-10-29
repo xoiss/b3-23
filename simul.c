@@ -35,8 +35,8 @@ static void prc_function();
 static void prc_equal();
 static void prc_percent();
 
-static void clear_all();
-static void clear_display();
+static void clr_all();
+static void clr_display();
 static void enter_number();
 static void norm_display();
 static void push_argument();
@@ -65,8 +65,8 @@ static int add();
 static int sub();
 static int is_left();
 static int is_right();
-static void shift_left();
-static void shift_right();
+static void sh_left();
+static void sh_right();
 
 void key_pressed(key)
     enum key_e key;
@@ -104,10 +104,10 @@ static void prc_clear(void)
 {
     switch (control.state) {
     case ST_READY:
-        clear_all();
+        clr_all();
         break;
     case ST_INT: case ST_FRAC:
-        clear_display();
+        clr_display();
         break;
     case ST_ERROR:
         break;
@@ -119,7 +119,7 @@ static void prc_number(key)
     enum key_e key;
 {
     if (control.state == ST_READY) {
-        clear_display();
+        clr_display();
         control.state = ST_INT;
     }
     enter_number((int)(key - KEY_0));
@@ -128,7 +128,7 @@ static void prc_number(key)
 static void prc_point(void)
 {
     if (control.state == ST_READY) {
-        clear_display();
+        clr_display();
     }
     control.state = ST_FRAC;
 }
@@ -170,14 +170,14 @@ static void prc_percent(void)
     control.state = error ? ST_ERROR : ST_READY;
 }
 
-static void clear_all(void)
+static void clr_all(void)
 {
     clear(&reg_1);
     clear(&reg_2);
     control.func = FN_NOP;
 }
 
-static void clear_display(void)
+static void clr_display(void)
 {
     clear(&reg_1);
 }
@@ -186,7 +186,7 @@ static void enter_number(digit)
     int digit;
 {
     if (!is_left(&reg_1)) {
-        shift_left(&reg_1);
+        sh_left(&reg_1);
         reg_1.d[0] = digit;
         reg_1.exp += (control.state == ST_FRAC);
     }
@@ -300,7 +300,7 @@ static int calc_add(void)
         equalize(&reg_1, &reg_2b);
         carry = add(&reg_1, &reg_2b);
         if (carry != 0) {
-            shift_right(&reg_1);
+            sh_right(&reg_1);
             reg_1.d[WIDTH - 1] = carry;
             reg_1.exp -= 1;
             if (reg_1.exp < 0) {
@@ -314,13 +314,13 @@ static int calc_add(void)
                 exchange(&reg_1, &reg_2b);
             }
             reg_1b = reg_1.d[WIDTH - 1];
-            shift_left(&reg_1);
+            sh_left(&reg_1);
             reg_1.exp += 1;
             equalize(&reg_1, &reg_2b);
             borrow = sub(&reg_1, &reg_2b);
             reg_1b -= borrow;
             if (reg_1b != 0) {
-                shift_right(&reg_1);
+                sh_right(&reg_1);
                 reg_1.d[WIDTH - 1] = reg_1b;
                 reg_1.exp -= 1;
             }
@@ -352,7 +352,7 @@ static int calc_mul(mode)
     reg_p.exp = justify(&reg_1) + justify(&reg_2) - (WIDTH - 1);
     reg_p.neg = reg_1.neg ^ reg_2.neg;
     for (i = 0; i < WIDTH; ++i) {
-        shift_right(&reg_p);
+        sh_right(&reg_p);
         reg_p.d[WIDTH - 1] = carry;
         carry = 0;
         for (digit = reg_2.d[i]; digit > 0; --digit) {
@@ -360,7 +360,7 @@ static int calc_mul(mode)
         }
     }
     if (carry != 0) {
-        shift_right(&reg_p);
+        sh_right(&reg_p);
         reg_p.d[WIDTH - 1] = carry;
         reg_p.exp -= 1;
     }
@@ -393,7 +393,7 @@ static int calc_div(mode)
     reg_q.neg = reg_1.neg ^ reg_2.neg;
     if (compare(&reg_1, &reg_2) < 0) {
         reg_1b = reg_1.d[WIDTH - 1];
-        shift_left(&reg_1);
+        sh_left(&reg_1);
         reg_q.exp += 1;
     }
     for (i = WIDTH - 1; i >= 0; --i) {
@@ -405,7 +405,7 @@ static int calc_div(mode)
         }
         reg_q.d[i] = digit;
         reg_1b = reg_1.d[WIDTH - 1];
-        shift_left(&reg_1);
+        sh_left(&reg_1);
     }
     digit = 0;
     while (reg_1b != 0 || compare(&reg_1, &reg_2) >= 0) {
@@ -462,7 +462,7 @@ static void normalize(reg)
     struct reg_s *reg;
 {
     while (!is_right(reg)) {
-        shift_right(reg);
+        sh_right(reg);
         reg->exp -= 1;
     }
     if (iszero(reg)) {
@@ -474,7 +474,7 @@ static void denormalize(reg)
     struct reg_s *reg;
 {
     while (!is_left(reg)) {
-        shift_left(reg);
+        sh_left(reg);
         reg->exp += 1;
     }
 }
@@ -492,7 +492,7 @@ static void round(reg)
     struct reg_s *reg;
 {
     while (reg->exp >= WIDTH) {
-        shift_right(reg);
+        sh_right(reg);
         reg->exp -= 1;
     }
 }
@@ -502,11 +502,11 @@ static void equalize(reg_a, reg_b)
     struct reg_s *reg_b;
 {
     while (reg_a->exp > reg_b->exp) {
-        shift_right(reg_a);
+        sh_right(reg_a);
         reg_a->exp -= 1;
     }
     while (reg_a->exp < reg_b->exp) {
-        shift_right(reg_b);
+        sh_right(reg_b);
         reg_b->exp -= 1;
     }
 }
@@ -585,7 +585,7 @@ static int is_right(reg)
     return reg->d[0] != 0 || reg->exp == 0;
 }
 
-static void shift_left(reg)
+static void sh_left(reg)
     struct reg_s *reg;
 {
     int i;
@@ -595,7 +595,7 @@ static void shift_left(reg)
     reg->d[0] = 0;
 }
 
-static void shift_right(reg)
+static void sh_right(reg)
     struct reg_s *reg;
 {
     int i, digit, carry;

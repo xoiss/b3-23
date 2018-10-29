@@ -29,6 +29,6 @@
 #define STATE "indicator and second registers, operational triggers"
 
 extern int prc_key();
-extern const char *print_state();
+extern const char *prt_state();
 
 #endif /* ADCON_H_ */

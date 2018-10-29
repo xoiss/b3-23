@@ -56,8 +56,8 @@ static const struct { enum func_e func_md; char c_md; } mode2char[] = {
     { FN_PCT_MUL, '%' }, { FN_PCT_DIV, '%' },
 };
 
-static void print_display();
-static void print_register();
+static void prt_display();
+static void prt_register();
 
 int prc_key(c)
     char *c;
@@ -79,7 +79,7 @@ int prc_key(c)
     return 0;
 }
 
-const char *print_state(void)
+const char *prt_state(void)
 {
     static char s[256];
     char *p = s;
@@ -102,15 +102,15 @@ const char *print_state(void)
     }
     *p++ = '[';
     *p++ = ' ';
-    print_display(&p);
+    prt_display(&p);
     *p++ = ']';
     *p++ = ' ';
     *p++ = ' ';
     *p++ = '[';
     *p++ = ' ';
-    print_register(&p, &reg_1);
+    prt_register(&p, &reg_1);
     *p++ = ' ';
-    print_register(&p, &reg_2);
+    prt_register(&p, &reg_2);
     *p++ = ' ';
     *p++ = state_c;
     *p++ = ' ';
@@ -123,7 +123,7 @@ const char *print_state(void)
     return s;
 }
 
-static void print_display(p)
+static void prt_display(p)
     char **p;
 {
     /* "-  0. 0. 0. 0. 0. 0. 0. 0. " */
@@ -143,7 +143,7 @@ static void print_display(p)
     }
 }
 
-static void print_register(p, reg)
+static void prt_register(p, reg)
     char **p;
     struct reg_s *reg;
 {

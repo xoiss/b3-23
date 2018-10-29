@@ -55,20 +55,20 @@ static int hide_dialogs;
 static int isinteractive();
 static int isendofstream();
 
-static void print_hello();
-static void print_prompt();
-static void print_bye();
+static void prt_hello();
+static void prt_prompt();
+static void prt_bye();
 static void prc_input();
 
 int main(void)
 {
     hide_dialogs = !isinteractive();
-    print_hello();
+    prt_hello();
     while (!isendofstream()) {
-        print_prompt();
+        prt_prompt();
         prc_input();
     }
-    print_bye();
+    prt_bye();
     return EXIT_SUCCESS;
 }
 
@@ -93,7 +93,7 @@ static int isendofstream(void)
     return ferror(stdin) || feof(stdin);
 }
 
-static void print_hello(void)
+static void prt_hello(void)
 {
     if (!hide_dialogs) {
         fputs(TARGET, stdout);
@@ -113,7 +113,7 @@ Enjoy! Best regards, xoiss, Moscow, 2018.\n", stdout);
     }
 }
 
-static void print_prompt(void)
+static void prt_prompt(void)
 {
     if (!hide_dialogs) {
         fputs("> ", stdout);
@@ -121,7 +121,7 @@ static void print_prompt(void)
     }
 }
 
-static void print_bye(void)
+static void prt_bye(void)
 {
     if (!hide_dialogs) {
         fputs("\n\
@@ -140,7 +140,7 @@ static void prc_input(void)
                 return;
             }
             if (prc_key(&c)) {
-                fprintf(stdout, "[%c] => %s\n", c, print_state());
+                fprintf(stdout, "[%c] => %s\n", c, prt_state());
                 fflush(stdout);
             }
         }
