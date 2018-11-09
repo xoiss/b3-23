@@ -1,57 +1,3 @@
-# Prerequisites
-*.d
-
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-#=======================================================================
 # Copyright 2018 Alexander A. Strelets. All rights reserved.
 #
 # Author: Alexander A. Strelets
@@ -71,11 +17,44 @@ dkms.conf
 # SOFTWARE IN ANY WAY, AND SHOULD IMMEDIATELY NOTIFY THE AUTHOR AND
 # DISCONTINUE ALL USE OF THE SOFTWARE.
 
-# Eclipse CDT and PyDev projects
-/.project
-/.cproject
-/.pydevproject
-/.settings/
+UDIR := ..
+UNIT := simulator-b3-23.c
 
-# Build system
-b3-23
+ifneq (,$(FORCE_TARGET))
+    TARGET := $(FORCE_TARGET)
+else
+    TARGET := $(lastword $(subst /, ,$(CURDIR)))
+endif
+
+ifneq (,$(WINDIR))
+    TARGET := $(TARGET).exe
+endif
+
+SOURCES := $(shell ls *.c 2>/dev/null) $(UDIR)/$(UNIT)
+
+CC = gcc
+
+PY = python
+
+CFLAGS = -ansi -pedantic -pedantic-errors\
+        -Wall -Wconversion -Wextra -Werror\
+        -O0 -g3 -fmessage-length=0\
+        -I$(UDIR) -Dstatic=
+
+.PHONY: all clean update
+
+ifneq (,$(SOURCES))
+all: $(TARGET)
+$(TARGET): $(SOURCES)
+	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
+else
+all:
+	@echo No source files found.
+endif
+
+clean:
+	$(RM) *.o $(TARGET)
+	$(RM) suit.h.new
+
+update:
+	$(PY) update.py $(CC) -E $(CFLAGS)
