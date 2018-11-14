@@ -1,5 +1,4 @@
-/*
- * Copyright 2018 Alexander A. Strelets. All rights reserved.
+/* Copyright 2018 Alexander A. Strelets. All rights reserved.
  *
  * Author: Alexander A. Strelets
  * e-mail: streletsaa@gmail.com
