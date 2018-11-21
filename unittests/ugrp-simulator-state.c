@@ -18,21 +18,61 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-UGRP("simulator-interface")
-UTST(enum_key_e)
-UTST(define_WIDTH)
-UTST(struct_reg_s)
-UTST(extern_reg_1)
-UTST(extern_reg_2)
-UTST(enum_state_e)
-UTST(enum_func_e)
-UTST(struct_control_s)
-UTST(extern_control)
-UTST(extern_key_pressed)
+#include "utst.h"
+#include "misc.h"
 
-UGRP("simulator-state")
+#include "helper.h"
+
 UTST(reg_1)
+{
+    UASRT(alen(reg_1.d) == WIDTH);
+    UASRT(sizeof reg_1.exp);
+    UASRT(sizeof reg_1.neg);
+
+    return UPASS;
+}
+
 UTST(reg_2)
+{
+    UASRT(alen(reg_2.d) == WIDTH);
+    UASRT(sizeof reg_2.exp);
+    UASRT(sizeof reg_2.neg);
+
+    return UPASS;
+}
+
 UTST(control)
+{
+    UASRT(sizeof control.state);
+    UASRT(sizeof control.func);
+
+    return UPASS;
+}
+
 UTST(initial_state)
+{
+    UMATCH(&reg_1, "0");
+    UMATCH(&reg_2, "0");
+
+    UASRT(control.state == ST_READY);
+    UASRT(control.func == FN_NOP);
+
+    return UPASS;
+}
+
 UTST(compound_state)
+{
+    USET(&reg_1, "+[1+]p1");
+    USET(&reg_2, "-[9-]p2");
+
+    control.state = ST_ERROR;
+    control.func = FN_ADD;
+
+    UMATCH(&reg_1, "+[1+]p1");
+    UMATCH(&reg_2, "-[9-]p2");
+
+    UASRT(control.state == ST_ERROR);
+    UASRT(control.func == FN_ADD);
+
+    return UPASS;
+}

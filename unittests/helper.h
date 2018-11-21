@@ -18,21 +18,23 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-UGRP("simulator-interface")
-UTST(enum_key_e)
-UTST(define_WIDTH)
-UTST(struct_reg_s)
-UTST(extern_reg_1)
-UTST(extern_reg_2)
-UTST(enum_state_e)
-UTST(enum_func_e)
-UTST(struct_control_s)
-UTST(extern_control)
-UTST(extern_key_pressed)
+#ifndef HELPER_H_
+#define HELPER_H_
 
-UGRP("simulator-state")
-UTST(reg_1)
-UTST(reg_2)
-UTST(control)
-UTST(initial_state)
-UTST(compound_state)
+#include "simulator-b3-23.h"
+
+extern int set_reg(struct reg_s *reg, const char s[]);
+extern int match_reg(struct reg_s *reg, const char s[]);
+
+#define USET(_reg, _s)\
+    do {\
+        if (set_reg(_reg, _s) != UPASS) return USKIP;\
+    } while(0)
+
+#define UMATCH(_reg, _s)\
+    do {\
+        int rc = match_reg(_reg, _s);\
+        if (rc != UPASS) return rc;\
+    } while(0)
+
+#endif /* HELPER_H_ */
