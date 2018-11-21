@@ -18,4 +18,14 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-UGRP("dummy")
+UGRP("simulator-interface")
+UTST(enum_key_e)
+UTST(define_WIDTH)
+UTST(struct_reg_s)
+UTST(extern_reg_1)
+UTST(extern_reg_2)
+UTST(enum_state_e)
+UTST(enum_func_e)
+UTST(struct_control_s)
+UTST(extern_control)
+UTST(extern_key_pressed)
