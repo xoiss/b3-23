@@ -18,31 +18,21 @@
  * DISCONTINUE ALL USE OF THE SOFTWARE.
  */
 
-UGRP("simulator-interface")
-UTST(enum_key_e)
-UTST(define_WIDTH)
-UTST(struct_reg_s)
-UTST(extern_reg_1)
-UTST(extern_reg_2)
-UTST(enum_state_e)
-UTST(enum_func_e)
-UTST(struct_control_s)
-UTST(extern_control)
-UTST(extern_key_pressed)
+#include "utst.h"
 
-UGRP("simulator-state")
-UTST(reg_1)
-UTST(reg_2)
-UTST(control)
-UTST(initial_state)
-UTST(compound_state)
+#include "helper.h"
 
-UGRP("simulator-iszero")
-UTST(iszero_0)
-UTST(iszero_1)
-UTST(iszero_10)
-UTST(iszero_10000000)
-UTST(iszero_n0p0000000)
+extern void clear(struct reg_s *reg);
 
-UGRP("simulator-clear")
 UTST(clear)
+{
+    struct reg_s reg;
+
+    USET(&reg, "-[+1]pw-1");
+
+    clear(&reg);
+
+    UMATCH(&reg, "0");
+
+    return UPASS;
+}
