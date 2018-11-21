@@ -85,3 +85,6 @@ UTST(compare_10_0p1)
 UTST(compare_1p0_1)
 UTST(compare_1_1p0)
 UTST(compare_0p1_10)
+
+UGRP("simulator-exchange")
+UTST(exchange)
