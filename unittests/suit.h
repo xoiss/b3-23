@@ -157,3 +157,8 @@ UTST(islimit_right_0p0000000)
 UTST(islimit_right_0p0000001)
 UTST(islimit_right_0p0000010)
 UTST(islimit_right_1p0000000)
+
+UGRP("simulator-shift_left")
+UTST(shift_left_87654321)
+UTST(shift_left_n87654321)
+UTST(shift_left_8765432p1)
