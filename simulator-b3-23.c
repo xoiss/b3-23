@@ -55,7 +55,7 @@ static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
 static void justify_right(struct reg_s *reg);
 static void justify_left(struct reg_s *reg);
-static int justify(struct reg_s *reg);
+static int normalize(struct reg_s *reg);
 static void trim(struct reg_s *reg);
 static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
 static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
@@ -340,7 +340,7 @@ static int calculate_mul(enum mode_e mode)
     int i, digit, carry = 0, exp_2 = reg_2.exp;
     struct reg_s reg_p;
     clear(&reg_p);
-    reg_p.exp = justify(&reg_1) + justify(&reg_2) - (WIDTH - 1);
+    reg_p.exp = normalize(&reg_1) + normalize(&reg_2) - (WIDTH - 1);
     reg_p.neg = reg_1.neg ^ reg_2.neg;
     for (i = 0; i < WIDTH; ++i) {
         shift_right(&reg_p);
@@ -379,7 +379,7 @@ static int calculate_div(enum mode_e mode)
         return 1;  /* overflow */
     }
     clear(&reg_q);
-    reg_q.exp = justify(&reg_1) - justify(&reg_2) + (WIDTH - 1);
+    reg_q.exp = normalize(&reg_1) - normalize(&reg_2) + (WIDTH - 1);
     reg_q.neg = reg_1.neg ^ reg_2.neg;
     if (compare(&reg_1, &reg_2) < 0) {
         reg_1b = reg_1.d[WIDTH - 1];
@@ -465,7 +465,7 @@ static void justify_left(struct reg_s *reg)
     }
 }
 
-static int justify(struct reg_s *reg)
+static int normalize(struct reg_s *reg)
 {
     int exp = reg->exp;
     reg->exp = 0;
