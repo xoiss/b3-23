@@ -54,7 +54,7 @@ static int calculate_div(enum mode_e mode);
 static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
 static void justify_right(struct reg_s *reg);
-static void denormalize(struct reg_s *reg);
+static void justify_left(struct reg_s *reg);
 static int justify(struct reg_s *reg);
 static void trim(struct reg_s *reg);
 static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
@@ -286,8 +286,8 @@ static int calculate_add(void)
 {
     int carry, borrow, reg_1b;
     struct reg_s reg_2b = reg_2;
-    denormalize(&reg_1);
-    denormalize(&reg_2b);
+    justify_left(&reg_1);
+    justify_left(&reg_2b);
     if (reg_1.neg == reg_2b.neg) {
         equalize(&reg_1, &reg_2b);
         carry = add(&reg_1, &reg_2b);
@@ -457,7 +457,7 @@ static void justify_right(struct reg_s *reg)
     }
 }
 
-static void denormalize(struct reg_s *reg)
+static void justify_left(struct reg_s *reg)
 {
     while (!islimit_left(reg)) {
         shift_left(reg);
@@ -469,7 +469,7 @@ static int justify(struct reg_s *reg)
 {
     int exp = reg->exp;
     reg->exp = 0;
-    denormalize(reg);
+    justify_left(reg);
     return exp + reg->exp;
 }
 
