@@ -56,7 +56,7 @@ static void clear(struct reg_s *reg);
 static void normalize(struct reg_s *reg);
 static void denormalize(struct reg_s *reg);
 static int justify(struct reg_s *reg);
-static void round(struct reg_s *reg);
+static void trim(struct reg_s *reg);
 static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
 static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
 static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
@@ -365,7 +365,7 @@ static int calculate_mul(enum mode_e mode)
         reg_1.exp += WIDTH;
         return 1;  /* overflow */
     }
-    round(&reg_1);
+    trim(&reg_1);
     return 0;
 }
 
@@ -421,7 +421,7 @@ static int calculate_div(enum mode_e mode)
         }
         return 1;  /* overflow */
     }
-    round(&reg_1);
+    trim(&reg_1);
     return 0;
 }
 
@@ -473,7 +473,7 @@ static int justify(struct reg_s *reg)
     return exp + reg->exp;
 }
 
-static void round(struct reg_s *reg)
+static void trim(struct reg_s *reg)
 {
     while (reg->exp >= WIDTH) {
         shift_right(reg);
