@@ -57,7 +57,7 @@ static void justify_right(struct reg_s *reg);
 static void justify_left(struct reg_s *reg);
 static int normalize(struct reg_s *reg);
 static void trim(struct reg_s *reg);
-static void equalize(struct reg_s *reg_a, struct reg_s *reg_b);
+static void align(struct reg_s *reg_a, struct reg_s *reg_b);
 static int compare(struct reg_s *reg_a, struct reg_s *reg_b);
 static void exchange(struct reg_s *reg_a, struct reg_s *reg_b);
 static int add(struct reg_s *reg_dst, struct reg_s *reg_src);
@@ -289,7 +289,7 @@ static int calculate_add(void)
     justify_left(&reg_1);
     justify_left(&reg_2b);
     if (reg_1.neg == reg_2b.neg) {
-        equalize(&reg_1, &reg_2b);
+        align(&reg_1, &reg_2b);
         carry = add(&reg_1, &reg_2b);
         if (carry != 0) {
             shift_right(&reg_1);
@@ -308,7 +308,7 @@ static int calculate_add(void)
             reg_1b = reg_1.d[WIDTH - 1];
             shift_left(&reg_1);
             reg_1.exp += 1;
-            equalize(&reg_1, &reg_2b);
+            align(&reg_1, &reg_2b);
             borrow = sub(&reg_1, &reg_2b);
             reg_1b -= borrow;
             if (reg_1b != 0) {
@@ -481,7 +481,7 @@ static void trim(struct reg_s *reg)
     }
 }
 
-static void equalize(struct reg_s *reg_a, struct reg_s *reg_b)
+static void align(struct reg_s *reg_a, struct reg_s *reg_b)
 {
     while (reg_a->exp > reg_b->exp) {
         shift_right(reg_a);
