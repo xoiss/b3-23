@@ -37,7 +37,7 @@ static void process_percent(void);
 static void clear_all(void);
 static void clear_display(void);
 static void enter_number(int digit);
-static void normalize_display(void);
+static void justify_display(void);
 static void push_argument(void);
 static void exchange_arguments(void);
 static int calculate(enum mode_e mode);
@@ -53,7 +53,7 @@ static int calculate_div(enum mode_e mode);
 
 static int iszero(struct reg_s *reg);
 static void clear(struct reg_s *reg);
-static void normalize(struct reg_s *reg);
+static void justify_right(struct reg_s *reg);
 static void denormalize(struct reg_s *reg);
 static int justify(struct reg_s *reg);
 static void trim(struct reg_s *reg);
@@ -147,7 +147,7 @@ static void process_function(enum key_e key)
 static void process_equal(void)
 {
     int error;
-    normalize_display();
+    justify_display();
     if (!isrepeated() && control.func != FN_NOP) {
         exchange_arguments();
     }
@@ -158,7 +158,7 @@ static void process_equal(void)
 static void process_percent(void)
 {
     int error;
-    normalize_display();
+    justify_display();
     if (control.func == FN_MUL || control.func == FN_DIV) {
         exchange_arguments();
     }
@@ -187,9 +187,9 @@ static void enter_number(int digit)
     }
 }
 
-static void normalize_display(void)
+static void justify_display(void)
 {
-    normalize(&reg_1);
+    justify_right(&reg_1);
 }
 
 static void push_argument(void)
@@ -245,7 +245,7 @@ static int calculate(enum mode_e mode)
     }
     setmode(mode);
     if (!error) {
-        normalize_display();
+        justify_display();
     }
     return error;
 }
@@ -355,7 +355,7 @@ static int calculate_mul(enum mode_e mode)
         reg_p.d[WIDTH - 1] = carry;
         reg_p.exp -= 1;
     }
-    normalize(&reg_2);
+    justify_right(&reg_2);
     reg_2.exp = exp_2;
     reg_1 = reg_p;
     if (mode == MD_PCT) {
@@ -411,7 +411,7 @@ static int calculate_div(enum mode_e mode)
     if (mode == MD_PCT) {
         reg_q.exp -= 2;
     }
-    normalize(&reg_2);
+    justify_right(&reg_2);
     reg_2.exp = exp_2;
     reg_1 = reg_q;
     if (reg_1.exp < 0) {
@@ -446,7 +446,7 @@ static void clear(struct reg_s *reg)
     reg->neg = 0;
 }
 
-static void normalize(struct reg_s *reg)
+static void justify_right(struct reg_s *reg)
 {
     while (!islimit_right(reg)) {
         shift_right(reg);
