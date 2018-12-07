@@ -393,3 +393,6 @@ UTST(getfunc_PCT_ADD)
 UTST(getfunc_PCT_SUB)
 UTST(getfunc_PCT_MUL)
 UTST(getfunc_PCT_DIV)
+
+UGRP("simulator-setmode")
+UTST(setmode)
